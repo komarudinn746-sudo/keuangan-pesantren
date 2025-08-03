@@ -8,7 +8,11 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Login } from "@/pages/Login";
 import { Dashboard } from "@/pages/Dashboard";
 import { Siswa } from "@/pages/data-induk/Siswa";
+import { Admin } from "@/pages/data-induk/Admin";
 import { TagihanKomite } from "@/pages/iuran-komite/TagihanKomite";
+import { PembayaranKomite } from "@/pages/iuran-komite/PembayaranKomite";
+import { PemasukanSuratIzin } from "@/pages/surat-izin/PemasukanSuratIzin";
+import { PemasukanDenda } from "@/pages/denda-santri/PemasukanDenda";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,11 +41,35 @@ const App = () => (
                 <Siswa />
               </DashboardLayout>
             } />
+            <Route path="/data-induk/admin" element={
+              <DashboardLayout>
+                <Admin />
+              </DashboardLayout>
+            } />
             
             {/* Iuran Komite Routes */}
             <Route path="/iuran-komite/tagihan" element={
               <DashboardLayout>
                 <TagihanKomite />
+              </DashboardLayout>
+            } />
+            <Route path="/iuran-komite/pembayaran" element={
+              <DashboardLayout>
+                <PembayaranKomite />
+              </DashboardLayout>
+            } />
+            
+            {/* Surat Izin Routes */}
+            <Route path="/surat-izin/pemasukan" element={
+              <DashboardLayout>
+                <PemasukanSuratIzin />
+              </DashboardLayout>
+            } />
+            
+            {/* Denda Santri Routes */}
+            <Route path="/denda-santri/pemasukan" element={
+              <DashboardLayout>
+                <PemasukanDenda />
               </DashboardLayout>
             } />
             
