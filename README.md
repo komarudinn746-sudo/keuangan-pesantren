@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Rekap Keuangan Pesantren
 
 ## Project info
 
@@ -6,12 +6,6 @@
 ## How can I edit this code?
 
 There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/2d04b55f-3a70-4875-804d-cf24e6a69788) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
