@@ -14,7 +14,399 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          jabatan: string | null
+          nama: string
+          role: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          jabatan?: string | null
+          nama: string
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          jabatan?: string | null
+          nama?: string
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      denda_santri: {
+        Row: {
+          created_at: string
+          id: string
+          jenis_pelanggaran: string
+          jumlah_denda: number
+          keterangan: string | null
+          siswa_id: string | null
+          status: string | null
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jenis_pelanggaran: string
+          jumlah_denda: number
+          keterangan?: string | null
+          siswa_id?: string | null
+          status?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jenis_pelanggaran?: string
+          jumlah_denda?: number
+          keterangan?: string | null
+          siswa_id?: string | null
+          status?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "denda_santri_siswa_id_fkey"
+            columns: ["siswa_id"]
+            isOneToOne: false
+            referencedRelation: "siswa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      infaq_parkir_pemasukan: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          keterangan: string | null
+          sumber: string
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          keterangan?: string | null
+          sumber: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          keterangan?: string | null
+          sumber?: string
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      infaq_parkir_pengeluaran: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          keperluan: string
+          keterangan: string | null
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          keperluan: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          keperluan?: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kamar: {
+        Row: {
+          created_at: string
+          id: string
+          kapasitas: number
+          keterangan: string | null
+          nomor: string
+          penghuni: number
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kapasitas?: number
+          keterangan?: string | null
+          nomor: string
+          penghuni?: number
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kapasitas?: number
+          keterangan?: string | null
+          nomor?: string
+          penghuni?: number
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      komite_pembayaran: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          keterangan: string | null
+          metode_bayar: string | null
+          periode: string
+          siswa_id: string | null
+          tanggal_bayar: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          keterangan?: string | null
+          metode_bayar?: string | null
+          periode: string
+          siswa_id?: string | null
+          tanggal_bayar?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          keterangan?: string | null
+          metode_bayar?: string | null
+          periode?: string
+          siswa_id?: string | null
+          tanggal_bayar?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "komite_pembayaran_siswa_id_fkey"
+            columns: ["siswa_id"]
+            isOneToOne: false
+            referencedRelation: "siswa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      komite_pengeluaran: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          keperluan: string
+          keterangan: string | null
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          keperluan: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          keperluan?: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lembaga: {
+        Row: {
+          alamat: string | null
+          created_at: string
+          id: string
+          jumlah_siswa: number | null
+          kepala: string | null
+          nama: string
+          telepon: string | null
+          updated_at: string
+        }
+        Insert: {
+          alamat?: string | null
+          created_at?: string
+          id?: string
+          jumlah_siswa?: number | null
+          kepala?: string | null
+          nama: string
+          telepon?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string | null
+          created_at?: string
+          id?: string
+          jumlah_siswa?: number | null
+          kepala?: string | null
+          nama?: string
+          telepon?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      siswa: {
+        Row: {
+          alamat: string | null
+          created_at: string
+          id: string
+          jenis_kelamin: string | null
+          kelas: string
+          nama: string
+          nama_wali: string | null
+          nis: string
+          tanggal_lahir: string | null
+          telepon_wali: string | null
+          tempat_lahir: string | null
+          updated_at: string
+        }
+        Insert: {
+          alamat?: string | null
+          created_at?: string
+          id?: string
+          jenis_kelamin?: string | null
+          kelas: string
+          nama: string
+          nama_wali?: string | null
+          nis: string
+          tanggal_lahir?: string | null
+          telepon_wali?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Update: {
+          alamat?: string | null
+          created_at?: string
+          id?: string
+          jenis_kelamin?: string | null
+          kelas?: string
+          nama?: string
+          nama_wali?: string | null
+          nis?: string
+          tanggal_lahir?: string | null
+          telepon_wali?: string | null
+          tempat_lahir?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      surat_izin_pemasukan: {
+        Row: {
+          biaya: number
+          created_at: string
+          id: string
+          jenis_surat: string
+          keterangan: string | null
+          siswa_id: string | null
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          biaya: number
+          created_at?: string
+          id?: string
+          jenis_surat: string
+          keterangan?: string | null
+          siswa_id?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          biaya?: number
+          created_at?: string
+          id?: string
+          jenis_surat?: string
+          keterangan?: string | null
+          siswa_id?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surat_izin_pemasukan_siswa_id_fkey"
+            columns: ["siswa_id"]
+            isOneToOne: false
+            referencedRelation: "siswa"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surat_izin_pengeluaran: {
+        Row: {
+          created_at: string
+          id: string
+          jumlah: number
+          keperluan: string
+          keterangan: string | null
+          tanggal: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          jumlah: number
+          keperluan: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          jumlah?: number
+          keperluan?: string
+          keterangan?: string | null
+          tanggal?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
