@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Search, Edit, Trash2, UserCheck } from "lucide-react";
+import { useAdmin, type Admin as AdminType } from "@/hooks/useAdmin";
+import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -28,47 +31,77 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
-const dummyAdmin = [
-  {
-    id: 1,
-    nama: "Ustadz Ahmad Syafii",
-    email: "ahmad.syafii@pesantren.ac.id",
-    jabatan: "Kepala Keuangan",
-    role: "Admin",
-    status: "Aktif",
-    tanggalBergabung: "2023-01-15"
-  },
-  {
-    id: 2,
-    nama: "Ustadzah Fatimah",
-    email: "fatimah@pesantren.ac.id", 
-    jabatan: "Staff Keuangan",
-    role: "Staff",
-    status: "Aktif",
-    tanggalBergabung: "2023-03-20"
-  },
-  {
-    id: 3,
-    nama: "Ustadz Muhammad Ridho",
-    email: "ridho@pesantren.ac.id",
-    jabatan: "Supervisor",
-    role: "Supervisor", 
-    status: "Aktif",
-    tanggalBergabung: "2023-06-10"
-  }
-];
-
 export const Admin = () => {
-  const [admin] = useState(dummyAdmin);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<AdminType | null>(null);
+  const [formData, setFormData] = useState<Omit<AdminType, 'id'>>({
+    nama: "",
+    email: "",
+    jabatan: "",
+    role: "Staff",
+    status: "Aktif"
+  });
+
+  const { admin, loading, addAdmin, updateAdmin, deleteAdmin } = useAdmin();
+  const { toast } = useToast();
 
   const filteredAdmin = admin.filter(item =>
     item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.jabatan.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.email && item.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.jabatan && item.jabatan.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const getRoleVariant = (role: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingAdmin) {
+        await updateAdmin(editingAdmin.id!, formData);
+      } else {
+        await addAdmin(formData);
+      }
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Error saving admin:', error);
+    }
+  };
+
+  const handleEdit = (adminData: AdminType) => {
+    setEditingAdmin(adminData);
+    setFormData({
+      nama: adminData.nama,
+      email: adminData.email || "",
+      jabatan: adminData.jabatan || "",
+      role: adminData.role || "Staff",
+      status: adminData.status || "Aktif"
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus data admin ini?')) {
+      await deleteAdmin(id);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nama: "",
+      email: "",
+      jabatan: "",
+      role: "Staff",
+      status: "Aktif"
+    });
+    setEditingAdmin(null);
+  };
+
+  const handleAddNew = () => {
+    resetForm();
+    setIsDialogOpen(true);
+  };
+
+  const getRoleVariant = (role?: string) => {
     switch (role) {
       case "Admin": return "default";
       case "Supervisor": return "secondary";
@@ -144,55 +177,82 @@ export const Admin = () => {
                   className="pl-10 w-80"
                 />
               </div>
-              <Dialog>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="gap-2">
+                  <Button className="gap-2" onClick={handleAddNew}>
                     <Plus className="h-4 w-4" />
                     Tambah Admin
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Tambah Admin Baru</DialogTitle>
+                    <DialogTitle>{editingAdmin ? 'Edit Admin' : 'Tambah Admin Baru'}</DialogTitle>
                     <DialogDescription>
-                      Tambahkan admin atau staff baru ke sistem
+                      {editingAdmin ? 'Edit data admin' : 'Tambahkan admin atau staff baru ke sistem'}
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Nama Lengkap</label>
-                      <Input placeholder="Ustadz Ahmad Syafii" />
+                  <form onSubmit={handleSubmit}>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nama">Nama Lengkap</Label>
+                        <Input
+                          id="nama"
+                          value={formData.nama}
+                          onChange={(e) => setFormData(prev => ({ ...prev, nama: e.target.value }))}
+                          placeholder="Ustadz Ahmad Syafii"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="ahmad@pesantren.ac.id"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="jabatan">Jabatan</Label>
+                        <Input
+                          id="jabatan"
+                          value={formData.jabatan}
+                          onChange={(e) => setFormData(prev => ({ ...prev, jabatan: e.target.value }))}
+                          placeholder="Kepala Keuangan"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Role</Label>
+                        <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Admin">Admin</SelectItem>
+                            <SelectItem value="Supervisor">Supervisor</SelectItem>
+                            <SelectItem value="Staff">Staff</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Aktif">Aktif</SelectItem>
+                            <SelectItem value="Tidak Aktif">Tidak Aktif</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Email</label>
-                      <Input type="email" placeholder="ahmad@pesantren.ac.id" />
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Batal</Button>
+                      <Button type="submit">{editingAdmin ? 'Update' : 'Simpan'}</Button>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Jabatan</label>
-                      <Input placeholder="Kepala Keuangan" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Role</label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="supervisor">Supervisor</SelectItem>
-                          <SelectItem value="staff">Staff</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Password Sementara</label>
-                      <Input type="password" placeholder="Password123!" />
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline">Batal</Button>
-                    <Button>Simpan Admin</Button>
-                  </div>
+                  </form>
                 </DialogContent>
               </Dialog>
             </div>
@@ -214,37 +274,51 @@ export const Admin = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAdmin.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell className="font-medium">{item.nama}</TableCell>
-                    <TableCell>{item.email}</TableCell>
-                    <TableCell>{item.jabatan}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRoleVariant(item.role)}>
-                        {item.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={item.status === "Aktif" ? "default" : "secondary"}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(item.tanggalBergabung).toLocaleDateString('id-ID')}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-3 w-3" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      Memuat data...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredAdmin.length > 0 ? (
+                  filteredAdmin.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell className="font-medium">{item.nama}</TableCell>
+                      <TableCell>{item.email || '-'}</TableCell>
+                      <TableCell>{item.jabatan || '-'}</TableCell>
+                      <TableCell>
+                        <Badge variant={getRoleVariant(item.role)}>
+                          {item.role || 'Staff'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={item.status === "Aktif" ? "default" : "secondary"}>
+                          {item.status || 'Aktif'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleDelete(item.id!)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      {searchTerm ? 'Tidak ada data yang sesuai dengan pencarian' : 'Belum ada data admin'}
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
