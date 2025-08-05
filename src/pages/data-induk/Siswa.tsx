@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +42,7 @@ export const Siswa = () => {
 
   const { siswa, loading, addSiswa, updateSiswa, deleteSiswa } = useSiswa();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filteredStudents = siswa.filter(student => 
     student.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -105,6 +106,76 @@ export const Siswa = () => {
     setIsDialogOpen(true);
   };
 
+  const importData = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const csv = e.target?.result as string;
+        const lines = csv.split('\n').filter(line => line.trim());
+        const headers = lines[0].split(',').map(h => h.trim());
+        
+        // Expected headers: NIS, Nama, Kelas, Tempat Lahir, Tanggal Lahir, Jenis Kelamin, Alamat, Nama Wali, Telepon Wali
+        if (headers.length < 3) {
+          throw new Error('Format CSV tidak valid. Minimal harus ada kolom NIS, Nama, dan Kelas');
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim());
+          if (values.length < 3 || !values[0] || !values[1] || !values[2]) {
+            errorCount++;
+            continue;
+          }
+
+          try {
+            const siswaData: Omit<SiswaType, 'id'> = {
+              nis: values[0],
+              nama: values[1],
+              kelas: values[2],
+              tempat_lahir: values[3] || "",
+              tanggal_lahir: values[4] || "",
+              jenis_kelamin: (values[5] === 'L' || values[5] === 'P') ? values[5] as 'L' | 'P' : undefined,
+              alamat: values[6] || "",
+              nama_wali: values[7] || "",
+              telepon_wali: values[8] || ""
+            };
+
+            await addSiswa(siswaData);
+            successCount++;
+          } catch (error) {
+            errorCount++;
+            console.error('Error importing row:', values, error);
+          }
+        }
+
+        toast({
+          title: "Import Selesai",
+          description: `Berhasil import ${successCount} data, ${errorCount} data gagal`,
+          variant: successCount > 0 ? "default" : "destructive"
+        });
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+        toast({
+          title: "Error",
+          description: "Gagal membaca file CSV. Pastikan format file benar",
+          variant: "destructive"
+        });
+      }
+    };
+
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   const exportData = () => {
     const csvContent = [
       ['NIS', 'Nama', 'Kelas', 'Tempat Lahir', 'Tanggal Lahir', 'Jenis Kelamin', 'Alamat', 'Nama Wali', 'Telepon Wali'],
@@ -143,7 +214,14 @@ export const Siswa = () => {
               </CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="gap-2" disabled>
+              <input
+                type="file"
+                accept=".csv"
+                ref={fileInputRef}
+                onChange={handleFileImport}
+                style={{ display: 'none' }}
+              />
+              <Button variant="outline" className="gap-2" onClick={importData}>
                 <Upload className="h-4 w-4" />
                 Import
               </Button>
